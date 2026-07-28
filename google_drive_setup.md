@@ -57,84 +57,162 @@ function salvarNoDrive(data) {
     var fileName = "Ficha_Abertura_" + empresaNome.replace(/[^a-zA-Z0-9]/g, "_");
 
     // -------------------------------------------------------------------------
-    // 2. Monta o Dossiê em PDF para a Contabilidade
+    // 2. Monta o Dossiê em PDF Completo e Detalhado para a Contabilidade
     // -------------------------------------------------------------------------
+    var dataFormatada = new Date().toLocaleDateString('pt-BR');
+    var protocolo = "AB-" + new Date().getTime().toString().substr(-6);
+
     var html = `
       <!DOCTYPE html>
       <html>
       <head>
         <meta charset="utf-8">
         <style>
-          body { font-family: Arial, sans-serif; color: #0f172a; padding: 25px; line-height: 1.4; }
-          .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 12px; margin-bottom: 20px; }
-          .title { color: #065f46; font-size: 20px; font-weight: bold; margin: 0; }
-          .subtitle { color: #64748b; font-size: 12px; margin-top: 4px; }
-          .section-title { background: #ecfdf5; color: #065f46; padding: 6px 10px; font-size: 13px; font-weight: bold; border-left: 4px solid #10b981; margin-top: 18px; }
-          .grid { display: table; width: 100%; margin-top: 8px; }
+          body { font-family: 'Helvetica Neue', Arial, sans-serif; color: #0f172a; padding: 25px; line-height: 1.4; font-size: 11px; }
+          .header { text-align: center; border-bottom: 3px solid #059669; padding-bottom: 12px; margin-bottom: 15px; }
+          .title { color: #065f46; font-size: 20px; font-weight: bold; margin: 0; text-transform: uppercase; letter-spacing: 0.5px; }
+          .subtitle { color: #475569; font-size: 12px; margin-top: 4px; font-weight: 500; }
+          .protocol-bar { background: #f0fdf4; border: 1px solid #bbf7d0; padding: 6px 12px; border-radius: 4px; display: table; width: 100%; margin-bottom: 15px; }
+          .protocol-cell { display: table-cell; font-size: 10px; color: #166534; }
+          .section-title { background: #059669; color: #ffffff; padding: 6px 10px; font-size: 12px; font-weight: bold; margin-top: 16px; margin-bottom: 8px; border-radius: 3px; }
+          .grid { display: table; width: 100%; border-collapse: collapse; margin-top: 4px; }
           .row { display: table-row; }
-          .cell { display: table-cell; padding: 5px 8px; font-size: 11px; width: 50%; }
-          .label { font-weight: bold; color: #334155; }
-          .partner-card { border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-top: 8px; font-size: 11px; background: #f8fafc; }
+          .cell { display: table-cell; padding: 5px 8px; font-size: 10.5px; width: 50%; border-bottom: 1px solid #f1f5f9; vertical-align: top; }
+          .cell-full { display: table-cell; padding: 6px 8px; font-size: 10.5px; width: 100%; border-bottom: 1px solid #f1f5f9; }
+          .label { font-weight: bold; color: #1e293b; display: inline-block; width: 150px; }
+          .val { color: #334155; }
+          .partner-card { border: 1px solid #cbd5e1; padding: 10px; border-radius: 6px; margin-top: 8px; background: #f8fafc; }
+          .badge-role { display: inline-block; background: #dcfce7; color: #166534; padding: 2px 6px; border-radius: 3px; font-size: 9.5px; font-weight: bold; float: right; }
+          .mercadoria-box { background: #fffbeb; border: 1px solid #fde68a; padding: 8px; border-radius: 5px; margin-top: 6px; color: #92400e; font-size: 10px; }
+          .footer { margin-top: 25px; border-top: 1px solid #e2e8f0; padding-top: 10px; text-align: center; font-size: 9px; color: #94a3b8; }
         </style>
       </head>
       <body>
         <div class="header">
-          <div class="title">SOLICITAÇÃO DE ABERTURA DE EMPRESA</div>
+          <div class="title">DOSSIÊ COMPLETO DE ABERTURA DE EMPRESA</div>
           <div class="subtitle">Ficha Simplificada do Cliente & Coleta de Documentos</div>
         </div>
 
-        <div class="section-title">1. DADOS DOS SÓCIOS / PROPRIETÁRIO</div>
+        <div class="protocol-bar">
+          <div class="protocol-cell" style="width: 50%;"><b>Protocolo:</b> ${protocolo}</div>
+          <div class="protocol-cell" style="width: 50%; text-align: right;"><b>Data de Emissão:</b> ${dataFormatada}</div>
+        </div>
+
+        <!-- 1. SÓCIOS / PROPRIETÁRIO -->
+        <div class="section-title">1. ESTRUTURA SOCIETÁRIA & EMPRESÁRIO</div>
+        <div style="margin-bottom: 6px;"><b>Tipo de Quadro Societário:</b> ${data.haveraSocios || 'Empresa Individual'}</div>
+
         ${(data.socios || []).map(function(s, i) {
+          var papelLabel = s.papelSocio === 'Mercadoria' ? '📦 Sócio Mercadoria / Produtos' : 
+                          s.papelSocio === 'Capital' ? '💰 Sócio de Capital' : 
+                          s.papelSocio === 'Misto' ? '⚡ Sócio Misto' : '💼 Sócio de Serviço / Trabalho';
+
           return '<div class="partner-card">' +
-                 '<b>' + (data.haveraSocios && data.haveraSocios.indexOf('Não') !== -1 ? 'Proprietário / Titular Único' : ('Sócio ' + (i+1))) + ':</b> ' + (s.nome || '-') + ' (' + (s.percentualCapital || 100) + '% das Cotas)<br>' +
-                 '<b>CPF:</b> ' + (s.cpf || '-') + ' | <b>RG/CNH:</b> ' + (s.rg || '-') + ' | <b>Data Nasc:</b> ' + (s.dataNascimento || '-') + '<br>' +
-                 '<b>Estado Civil:</b> ' + (s.estadoCivil || '-') + ' | <b>Profissão:</b> ' + (s.profissao || '-') + '<br>' +
-                 '<b>Telefone/WhatsApp:</b> ' + (s.telefone || '-') + ' | <b>E-mail:</b> ' + (s.email || '-') + '<br>' +
-                 '<b>Endereço Residencial:</b> ' + (s.endereco || '-') + '<br>' +
-                 '<b>Papel no Negócio:</b> ' + (s.papelSocio || 'Titular') +
-                 (s.descricaoMercadoria ? '<br><b style="color:#b45309;">📦 Mercadorias/Produtos do Sócio:</b> ' + s.descricaoMercadoria : '') +
+                 '<div style="margin-bottom: 4px;">' +
+                 '<b style="font-size: 11.5px; color: #065f46;">' + (data.haveraSocios && data.haveraSocios.indexOf('Não') !== -1 ? 'Empresário / Titular Único' : ('Sócio ' + (i+1) + ': ' + (s.nome || 'Não informado'))) + '</b>' +
+                 '<span class="badge-role">' + papelLabel + '</span>' +
+                 '</div>' +
+                 '<div class="grid">' +
+                   '<div class="row">' +
+                     '<div class="cell"><span class="label">CPF:</span> <span class="val">' + (s.cpf || '-') + '</span></div>' +
+                     '<div class="cell"><span class="label">RG ou CNH:</span> <span class="val">' + (s.rg || '-') + '</span></div>' +
+                   '</div>' +
+                   '<div class="row">' +
+                     '<div class="cell"><span class="label">Data de Nascimento:</span> <span class="val">' + (s.dataNascimento || '-') + '</span></div>' +
+                     '<div class="cell"><span class="label">Estado Civil:</span> <span class="val">' + (s.estadoCivil || '-') + '</span></div>' +
+                   '</div>' +
+                   '<div class="row">' +
+                     '<div class="cell"><span class="label">Profissão:</span> <span class="val">' + (s.profissao || '-') + '</span></div>' +
+                     '<div class="cell"><span class="label">% Cotas no Capital:</span> <span class="val">' + (s.percentualCapital || 100) + '%</span></div>' +
+                   '</div>' +
+                   '<div class="row">' +
+                     '<div class="cell"><span class="label">Telefone / WhatsApp:</span> <span class="val">' + (s.telefone || '-') + '</span></div>' +
+                     '<div class="cell"><span class="label">E-mail:</span> <span class="val">' + (s.email || '-') + '</span></div>' +
+                   '</div>' +
+                   '<div class="row">' +
+                     '<div class="cell" style="width: 100%; display: table-cell;" colspan="2"><span class="label">Endereço Residencial:</span> <span class="val">' + (s.endereco || '-') + '</span></div>' +
+                   '</div>' +
+                 '</div>' +
+                 (s.descricaoMercadoria ? '<div class="mercadoria-box"><b>📦 Mercadorias / Produtos do Sócio:</b> ' + s.descricaoMercadoria + '</div>' : '') +
                  '</div>';
         }).join('')}
 
-        <div class="section-title">2. SOBRE O NEGÓCIO & OPERAÇÃO</div>
+        <div style="margin-top: 8px; background: #f1f5f9; padding: 6px 10px; border-radius: 4px;">
+          <b>Possui débitos/restrições fiscais?</b> ${(data.verificacoesSimples && data.verificacoesSimples.debitosFiscais) || 'Não'} &nbsp;|&nbsp;
+          <b>É servidor público ativo?</b> ${(data.verificacoesSimples && data.verificacoesSimples.servidorPublico) || 'Não'}
+        </div>
+
+        <!-- 2. O NEGÓCIO & OPERAÇÃO -->
+        <div class="section-title">2. DETALHAMENTO DO NEGÓCIO & OPERAÇÃO</div>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 8px; border-radius: 4px; margin-bottom: 8px;">
+          <b>Descrição Geral do que a Empresa Fará:</b><br>
+          <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.oQueEmpresaFara) || 'Não informado'}</span>
+        </div>
+
         <div class="grid">
           <div class="row">
-            <div class="cell"><span class="label">Atividade Principal:</span> ${(data.dadosOperacionais && data.dadosOperacionais.oQueEmpresaFara) || '-'}</div>
-            <div class="cell"><span class="label">Atendimento:</span> ${(data.dadosOperacionais && data.dadosOperacionais.tipoOperacao) || '-'}</div>
+            <div class="cell"><span class="label">Tipo de Atendimento:</span> <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.tipoOperacao) || '-'}</span></div>
+            <div class="cell"><span class="label">Modo de Execução:</span> <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.modoExecucao) || '-'}</span></div>
           </div>
           <div class="row">
-            <div class="cell"><span class="label">Modo de Execução:</span> ${(data.dadosOperacionais && data.dadosOperacionais.modoExecucao) || '-'}</div>
-            <div class="cell"><span class="label">Estoque no Local:</span> ${(data.dadosOperacionais && data.dadosOperacionais.estoqueLocal) || '-'}</div>
+            <div class="cell"><span class="label">Produtos Comercializados:</span> <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.quaisProdutos) || 'Nenhum'}</span></div>
+            <div class="cell"><span class="label">Serviços Prestados:</span> <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.quaisServicos) || 'Nenhum'}</span></div>
           </div>
           <div class="row">
-            <div class="cell"><span class="label">Produtos/Mercadorias:</span> ${(data.dadosOperacionais && data.dadosOperacionais.quaisProdutos) || '-'}</div>
-            <div class="cell"><span class="label">Serviços Prestados:</span> ${(data.dadosOperacionais && data.dadosOperacionais.quaisServicos) || '-'}</div>
+            <div class="cell"><span class="label">Estoque no Local:</span> <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.estoqueLocal) || '-'}</span></div>
+            <div class="cell"><span class="label">Contratação de Funcionários:</span> <span class="val">${(data.dadosOperacionais && data.dadosOperacionais.funcionarios) || '-'}</span></div>
           </div>
         </div>
 
-        <div class="section-title">3. ENDEREÇO & NOMES PREFERENCIAIS</div>
+        <!-- 3. ENDEREÇO & NOMES PREFERENCIAIS -->
+        <div class="section-title">3. ENDEREÇO DA SEDE & NOMES (JUNTA COMERCIAL)</div>
         <div class="grid">
           <div class="row">
-            <div class="cell"><span class="label">1ª Opção Razão Social:</span> ${(data.dadosNomes && data.dadosNomes.razaoOpcao1) || '-'}</div>
-            <div class="cell"><span class="label">2ª Opção Razão Social:</span> ${(data.dadosNomes && data.dadosNomes.razaoOpcao2) || '-'}</div>
+            <div class="cell"><span class="label">1ª Opção Razão Social:</span> <span class="val"><b>${(data.dadosNomes && data.dadosNomes.razaoOpcao1) || '-'}</b></span></div>
+            <div class="cell"><span class="label">2ª Opção Razão Social:</span> <span class="val">${(data.dadosNomes && data.dadosNomes.razaoOpcao2) || '-'}</span></div>
           </div>
           <div class="row">
-            <div class="cell"><span class="label">Nome Fantasia:</span> ${(data.dadosNomes && data.dadosNomes.nomeFantasia) || '-'}</div>
-            <div class="cell"><span class="label">Inscrição IPTU:</span> ${(data.enderecoEmpresa && data.enderecoEmpresa.inscricaoIptu) || '-'}</div>
+            <div class="cell"><span class="label">Nome Fantasia:</span> <span class="val"><b>${(data.dadosNomes && data.dadosNomes.nomeFantasia) || '-'}</b></span></div>
+            <div class="cell"><span class="label">Inscrição IPTU:</span> <span class="val">${(data.enderecoEmpresa && data.enderecoEmpresa.inscricaoIptu) || 'Não informado'}</span></div>
+          </div>
+          <div class="row">
+            <div class="cell"><span class="label">Uso / Vínculo do Imóvel:</span> <span class="val">${(data.enderecoEmpresa && data.enderecoEmpresa.usoImovel) || '-'}</span></div>
+            <div class="cell"><span class="label">CEP:</span> <span class="val">${(data.enderecoEmpresa && data.enderecoEmpresa.cep) || '-'}</span></div>
           </div>
           <div class="row">
             <div class="cell" style="width: 100%; display: table-cell;" colspan="2">
-              <span class="label">Endereço da Sede:</span> ${(data.enderecoEmpresa && data.enderecoEmpresa.logradouro) || ''}, ${(data.enderecoEmpresa && data.enderecoEmpresa.bairro) || ''} - ${(data.enderecoEmpresa && data.enderecoEmpresa.municipioUf) || ''} (CEP: ${(data.enderecoEmpresa && data.enderecoEmpresa.cep) || ''})
+              <span class="label">Endereço Completo:</span> <span class="val">${(data.enderecoEmpresa && data.enderecoEmpresa.logradouro) || ''}, ${(data.enderecoEmpresa && data.enderecoEmpresa.bairro) || ''} - ${(data.enderecoEmpresa && data.enderecoEmpresa.municipioUf) || ''}</span>
             </div>
           </div>
         </div>
 
-        <div class="section-title">4. ESTIMATIVAS INICIAIS</div>
+        <!-- 4. ESTIMATIVAS INICIAIS -->
+        <div class="section-title">4. ESTIMATIVAS INICIAIS & INVESTIMENTO</div>
         <div class="grid">
           <div class="row">
-            <div class="cell"><span class="label">Capital Social Estimado:</span> R$ ${(data.estimativaInicial && data.estimativaInicial.capitalSocial || 10000).toLocaleString('pt-BR')}</div>
-            <div class="cell"><span class="label">Faturamento Mensal Previsto:</span> R$ ${(data.estimativaInicial && data.estimativaInicial.faturamentoMensalPrevisto || '-')}</div>
+            <div class="cell"><span class="label">Capital Social Estimado:</span> <span class="val">R$ ${(data.estimativaInicial && data.estimativaInicial.capitalSocial || 10000).toLocaleString('pt-BR')}</span></div>
+            <div class="cell"><span class="label">Previsão de Faturamento:</span> <span class="val">R$ ${(data.estimativaInicial && data.estimativaInicial.faturamentoMensalPrevisto || '-')}</span></div>
           </div>
+        </div>
+
+        <!-- 5. ANEXOS -->
+        <div class="section-title">5. DOCUMENTOS ANEXADOS & SALVOS NO GOOGLE DRIVE</div>
+        ${(function() {
+          var lista = data.anexos || data.documentosAnexadosFiles || [];
+          if (!lista.length) return '<div><i>Nenhum documento anexado.</i></div>';
+          var htmlDocs = '<div style="margin-top: 4px;">';
+          for (var k = 0; k < lista.length; k++) {
+            var docItem = lista[k];
+            htmlDocs += '<div style="padding: 4px 8px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; margin-bottom: 3px;">' +
+                        '📎 <b>' + (docItem.categoria || 'Documento') + ':</b> ' + (docItem.nomeArquivo || docItem.fileName || ('Arquivo_' + (k+1))) +
+                        '</div>';
+          }
+          htmlDocs += '</div>';
+          return htmlDocs;
+        })()}
+
+        <div class="footer">
+          Relatório Técnico de Solicitação de Abertura de Empresa • Gerado via Webhook para a Contabilidade
         </div>
       </body>
       </html>

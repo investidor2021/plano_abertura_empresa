@@ -511,6 +511,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const capitalVal = parseFloat(document.getElementById('intCapitalTotalVal')?.value) || 10000;
     const fatEstimadoText = document.getElementById('intFatMensalRealista')?.options[document.getElementById('intFatMensalRealista')?.selectedIndex]?.text || 'R$ 25.000 / mês';
 
+    const debitosFiscais = document.getElementById('intDebitosFiscais')?.value || 'Não';
+    const servidorPublico = document.getElementById('intServidorPublico')?.value || 'Não';
+
     const isSingle = interviewState.haveraSocios.startsWith('Não');
 
     const totalAnexos = interviewFilesState.cnh.length + interviewFilesState.comprovanteResidencia.length + interviewFilesState.outrosDocs.length;
@@ -557,6 +560,10 @@ document.addEventListener('DOMContentLoaded', () => {
               </div>
             `;
           }).join('')}
+        </div>
+        <div style="margin-top: 0.75rem; background: var(--bg-card-subtle); padding: 0.75rem; border-radius: var(--radius-md); border: 1px solid var(--border-color); font-size: 0.88rem;">
+          <div><strong>Possui débitos/restrições fiscais?</strong> ${debitosFiscais}</div>
+          <div><strong>É servidor público ativo?</strong> ${servidorPublico}</div>
         </div>
       </div>
 
