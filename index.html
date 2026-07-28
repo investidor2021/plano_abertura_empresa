@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Plano de Abertura de Empresa | Guia, Simulador & Checklist Contábil</title>
+  <meta name="description" content="Formulário interativo para abertura de empresas, simulação de impostos, limites de faturamento, anexos de documentos e exportação para o Google Drive.">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- Header Banner -->
+  <header class="app-header">
+    <div class="header-container">
+      <div>
+        <div class="brand-badge">
+          <i data-lucide="building-2"></i> Planejamento Contábil Inteligente
+        </div>
+        <h1 class="header-title">Plano de Abertura de Empresa</h1>
+        <p class="header-subtitle">
+          Preencha o formulário guiado, conheça os limites de faturamento, simule seus impostos, anexe os documentos necessários e envie direto para a sua contabilidade no Google Drive.
+        </p>
+      </div>
+      <button type="button" class="theme-toggle-btn" id="themeToggleBtn" title="Alternar Tema Claro/Escuro">
+        <i data-lucide="moon"></i> <span id="themeBtnText">Modo Escuro</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+
+    <!-- Stepper Navigation -->
+    <nav class="stepper-card">
+      <ul class="stepper-list" id="stepperList">
+        <li class="stepper-progress-bar" id="progressBar"></li>
+        
+        <button type="button" class="step-item active" data-step="1">
+          <div class="step-bubble">1</div>
+          <span class="step-label">Atividades</span>
+        </button>
+
+        <button type="button" class="step-item" data-step="2">
+          <div class="step-bubble">2</div>
+          <span class="step-label">Natureza & Porte</span>
+        </button>
+
+        <button type="button" class="step-item" data-step="3">
+          <div class="step-bubble">3</div>
+          <span class="step-label">Impostos & Limites</span>
+        </button>
+
+        <button type="button" class="step-item" data-step="4">
+          <div class="step-bubble">4</div>
+          <span class="step-label">Empresa & Local</span>
+        </button>
+
+        <button type="button" class="step-item" data-step="5">
+          <div class="step-bubble">5</div>
+          <span class="step-label">Sócios & Regras</span>
+        </button>
+
+        <button type="button" class="step-item" data-step="6">
+          <div class="step-bubble">6</div>
+          <span class="step-label">Documentos PDF</span>
+        </button>
+
+        <button type="button" class="step-item" data-step="7">
+          <div class="step-bubble">7</div>
+          <span class="step-label">Resumo & Envio</span>
+        </button>
+      </ul>
+    </nav>
+
+    <!-- FORM WIZARD PANELS -->
+    <form id="companyOpeningForm" onsubmit="return false;">
+
+      <!-- STEP 1: RAMO E ATIVIDADES -->
+      <section class="step-content-panel active" id="panelStep1">
+        <div class="panel-header">
+          <h2><i data-lucide="briefcase"></i> 1. Ramo de Atividade e Atividades Desenvolvidas</h2>
+          <p>A partir das atividades informadas, a contabilidade classificará os CNAEs adequados para o registro legal da empresa.</p>
+        </div>
+
+        <div class="info-box">
+          <div class="info-box-title">
+            <i data-lucide="info"></i> Por que é crucial detalhar todas as atividades?
+          </div>
+          <p>O enquadramento tributário (Simples Nacional, Lucro Presumido, etc.) depende diretamente dos CNAEs selecionados. Atividades secundárias devem ser listadas para evitar alterações contratuais posteriores.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="ramoAtividade">Qual o ramo principal da atividade? <span class="required">*</span></label>
+          <select id="ramoAtividade" class="select-input" required>
+            <option value="">Selecione o ramo principal...</option>
+            <option value="Prestação de Serviços">Prestação de Serviços (Consultoria, TI, Saúde, Advocacia, Aulas, etc.)</option>
+            <option value="Comércio Varejista/Atacadista">Comércio (Loja Física, E-commerce, Venda de Mercadorias)</option>
+            <option value="Indústria / Transformação">Indústria ou Fabricação de Produtos</option>
+            <option value="Serviços + Comércio">Misto (Prestação de Serviços + Venda de Produtos)</option>
+            <option value="Outros">Outros / Não Especificado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="descricaoDetalhadaAtividades">Descrição Completa de Todas as Atividades <span class="required">*</span></label>
+          <textarea id="descricaoDetalhadaAtividades" class="textarea-input" placeholder="Exemplo: Prestação de serviços de consultoria em tecnologia, desenvolvimento de programas sob encomenda, treinamento de equipe e revenda de licenças de software." required></textarea>
+          <div class="form-hint">Liste detalhadamente tudo o que a empresa irá fazer no dia a dia.</div>
+        </div>
+
+        <!-- Opções de Nome Empresarial (Junta Comercial exige 3 opções) -->
+        <h3 style="font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.85rem;">
+          <i data-lucide="file-signature"></i> Opções de Razão Social (Junta Comercial)
+        </h3>
+        <div class="info-box">
+          <div class="info-box-title"><i data-lucide="info"></i> Pesquisa Prévia de Nome:</div>
+          <p>A Junta Comercial exige 3 opções de nome empresarial por ordem de preferência caso o primeiro nome colida com outra empresa existente.</p>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="razaoSocialOpcao1">1ª Opção de Razão Social <span class="required">*</span></label>
+            <input type="text" id="razaoSocialOpcao1" class="input-text" placeholder="Ex: Silva & Santos Tecnologia LTDA" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="razaoSocialOpcao2">2ª Opção de Razão Social</label>
+            <input type="text" id="razaoSocialOpcao2" class="input-text" placeholder="Ex: Santos & Silva Soluções LTDA">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="razaoSocialOpcao3">3ª Opção de Razão Social</label>
+            <input type="text" id="razaoSocialOpcao3" class="input-text" placeholder="Ex: SS Tecnologia e Inovação LTDA">
+          </div>
+        </div>
+
+        <!-- Capital Social & Integralização -->
+        <h3 style="font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.85rem;">
+          <i data-lucide="coins"></i> Capital Social & Pró-Labore
+        </h3>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="capitalSocialTotal">Capital Social Inicial (R$) <span class="required">*</span></label>
+            <input type="number" id="capitalSocialTotal" class="input-text" value="10000" min="1" step="100" placeholder="Ex: 10000" required>
+            <div class="form-hint">Valor total investido pelos sócios para iniciar a empresa.</div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="formaIntegralizacao">Forma de Integralização <span class="required">*</span></label>
+            <select id="formaIntegralizacao" class="select-input" required>
+              <option value="Moeda Corrente Nacional (Dinheiro/PIX)">Moeda Corrente Nacional (Dinheiro/PIX)</option>
+              <option value="Transferência Bancária">Transferência Bancária</option>
+              <option value="Bens Móveis / Veículos / Equipamentos">Bens Móveis / Veículos / Equipamentos</option>
+              <option value="Imóveis">Imóveis</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="proLaboreEstimado">Previsão de Pró-Labore dos Sócios</label>
+            <input type="text" id="proLaboreEstimado" class="input-text" placeholder="Ex: 1 Salário Mínimo para o Sócio Administrador">
+          </div>
+        </div>
+
+        <div class="panel-footer-actions">
+          <div></div> <!-- Placeholder for left alignment -->
+          <button type="button" class="btn btn-primary btn-next-step">
+            Avançar: Natureza & Porte <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 2: NATUREZA JURÍDICA E PORTE -->
+      <section class="step-content-panel" id="panelStep2">
+        <div class="panel-header">
+          <h2><i data-lucide="scale"></i> 2. Natureza Jurídica e Porte da Empresa</h2>
+          <p>Escolha o modelo societário ideal para o seu negócio e entenda a proteção do patrimônio pessoal.</p>
+        </div>
+
+        <!-- Natureza Juridica Selection -->
+        <div class="form-group">
+          <label class="form-label">Selecione a Natureza Jurídica Desejada: <span class="required">*</span></label>
+
+          <div class="radio-grid">
+            <!-- SLU -->
+            <label class="radio-card selected">
+              <input type="radio" name="naturezaJuridica" value="Sociedade Limitada Unipessoal (SLU)" checked>
+              <div class="radio-card-title">
+                SLU <span class="radio-card-badge">Sem Sócio</span>
+              </div>
+              <div class="radio-card-desc">
+                <strong>Sociedade Limitada Unipessoal:</strong> Permite abrir empresa sem sócios, com patrimônio pessoal protegido contra dívidas do negócio. Substituiu o antigo EIRELI sem exigir capital mínimo alto.
+              </div>
+              <div class="radio-card-extra">Proteção Patrimonial • 1 Titular</div>
+            </label>
+
+            <!-- LTDA -->
+            <label class="radio-card">
+              <input type="radio" name="naturezaJuridica" value="Sociedade Limitada (LTDA)">
+              <div class="radio-card-title">
+                LTDA <span class="radio-card-badge">2+ Sócios</span>
+              </div>
+              <div class="radio-card-desc">
+                <strong>Sociedade Limitada:</strong> Ideal para 2 ou mais sócios. O patrimônio pessoal dos sócios fica resguardado, restrito ao valor das cotas do capital social investido.
+              </div>
+              <div class="radio-card-extra">Proteção Patrimonial • Múltiplos Sócios</div>
+            </label>
+
+            <!-- MEI -->
+            <label class="radio-card">
+              <input type="radio" name="naturezaJuridica" value="Microempreendedor Individual (MEI)">
+              <div class="radio-card-title">
+                MEI <span class="radio-card-badge">Até R$ 81k/ano</span>
+              </div>
+              <div class="radio-card-desc">
+                <strong>Microempreendedor Individual:</strong> Formato simplificado com imposto fixo mensal (DAS), para faturamento até R$ 81.000/ano e no máximo 1 funcionário.
+              </div>
+              <div class="radio-card-extra">Imposto Fixo • Sem Proteção de Bens</div>
+            </label>
+
+            <!-- EI -->
+            <label class="radio-card">
+              <input type="radio" name="naturezaJuridica" value="Empresário Individual (EI)">
+              <div class="radio-card-title">
+                EI <span class="radio-card-badge">Empresário Individual</span>
+              </div>
+              <div class="radio-card-desc">
+                <strong>Empresário Individual:</strong> Titular único, porém com grande desvantagem: o patrimônio pessoal se confunde com o da empresa, respondendo ilimitadamente por dívidas.
+              </div>
+              <div class="radio-card-extra">Risco Patrimonial • 1 Titular</div>
+            </label>
+
+            <!-- Sociedade Simples -->
+            <label class="radio-card">
+              <input type="radio" name="naturezaJuridica" value="Sociedade Simples">
+              <div class="radio-card-title">
+                Sociedade Simples
+              </div>
+              <div class="radio-card-desc">
+                <strong>Sociedade Simples:</strong> Voltada para prestadores de serviços de profissões intelectuais regulamentadas (médicos, advogados, dentistas, engenheiros) em sociedade.
+              </div>
+              <div class="radio-card-extra">Profissional Intelectual / Científico</div>
+            </label>
+
+            <!-- S/A -->
+            <label class="radio-card">
+              <input type="radio" name="naturezaJuridica" value="Sociedade Anônima (S/A)">
+              <div class="radio-card-title">
+                Sociedade Anônima (S/A)
+              </div>
+              <div class="radio-card-desc">
+                <strong>Sociedade Anônima:</strong> Estrutura societária robusta com capital dividido em ações (aberto ou fechado). Ideal para captação de investimento em grande escala.
+              </div>
+              <div class="radio-card-extra">Grandes Empresas • Ações</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Porte da Empresa -->
+        <div class="form-group" style="margin-top: 2rem;">
+          <label class="form-label" for="porteEmpresa">Porte Estimado da Empresa: <span class="required">*</span></label>
+          <select id="porteEmpresa" class="select-input" required>
+            <option value="MEI">MEI - Microempreendedor Individual (Até R$ 81.000,00 / ano)</option>
+            <option value="ME" selected>ME - Microempresa (Faturamento até R$ 360.000,00 / ano)</option>
+            <option value="EPP">EPP - Empresa de Pequeno Porte (Faturamento R$ 360.000,01 até R$ 4.800.000,00 / ano)</option>
+            <option value="Demais">Demais Portes (Faturamento acima de R$ 4.800.000,00 / ano)</option>
+          </select>
+        </div>
+
+        <div class="panel-footer-actions">
+          <button type="button" class="btn btn-secondary btn-prev-step">
+            <i data-lucide="arrow-left"></i> Voltar
+          </button>
+          <button type="button" class="btn btn-primary btn-next-step">
+            Avançar: Impostos & Limites <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 3: SIMULADOR TRIBUTÁRIO, LIMITES E ALÍQUOTAS -->
+      <section class="step-content-panel" id="panelStep3">
+        <div class="panel-header">
+          <h2><i data-lucide="calculator"></i> 3. Limites de Faturamento, Regimes Tributários e Simulador</h2>
+          <p>Entenda os percentuais de impostos, limites de faturamento e simule o valor mensal estimado para o seu negócio.</p>
+        </div>
+
+        <!-- Interactive Simulator Box -->
+        <div class="simulator-box">
+          <h3 style="display: flex; align-items: center; gap: 0.5rem; color: var(--primary-700);">
+            <i data-lucide="sparkles"></i> Simulador Contábil em Tempo Real
+          </h3>
+          <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.25rem;">
+            Informe o faturamento mensal estimado para calcularmos automaticamente a melhor opção de enquadramento tributário e estimativa de imposto:
+          </p>
+
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="simFaturamentoMensal">Faturamento Mensal Estimado (R$):</label>
+              <input type="number" id="simFaturamentoMensal" class="input-text" value="20000" min="0" step="500" placeholder="Ex: 20000">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label" for="simTipoAtividade">Tipo de Operação Principal:</label>
+              <select id="simTipoAtividade" class="select-input">
+                <option value="comercio">Comércio / Loja (Simples Anexo I)</option>
+                <option value="industria">Indústria / Fabricação (Simples Anexo II)</option>
+                <option value="servico_geral" selected>Serviços Gerais / TI / Consultoria (Simples Anexo III)</option>
+                <option value="servico_anexo4">Advocacia / Obras / Limpeza (Simples Anexo IV)</option>
+                <option value="servico_anexo5">Profissão Regulamentada sem Fator R (Simples Anexo V)</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Dynamic Result Cards -->
+          <div class="sim-results-grid">
+            <div class="sim-stat-card">
+              <div class="label">Faturamento Anual Projetado</div>
+              <div class="value" id="simResultAnual">R$ 240.000,00</div>
+            </div>
+
+            <div class="sim-stat-card emerald">
+              <div class="label">Regime Recomendado</div>
+              <div class="value" id="simResultRegime">Simples Nacional</div>
+            </div>
+
+            <div class="sim-stat-card">
+              <div class="label">Alíquota Efetiva Est.</div>
+              <div class="value" id="simResultAliquota">6.00%</div>
+            </div>
+
+            <div class="sim-stat-card emerald">
+              <div class="label">Imposto Mensal Est.</div>
+              <div class="value" id="simResultImpostoMensal">R$ 1.200,00</div>
+            </div>
+          </div>
+
+          <div id="simNote" class="info-box emerald" style="margin-top: 1.25rem; margin-bottom: 0;">
+            <div class="info-box-title"><i data-lucide="check-circle-2"></i> Diagnóstico Tributário:</div>
+            <p id="simNoteText">Para um faturamento de R$ 20.000,00/mês em Serviços Gerais, o <strong>Simples Nacional (Anexo III)</strong> oferece a menor carga tributária unificada.</p>
+          </div>
+        </div>
+
+        <!-- Comprehensive Educational Guide on Regimes & Revenue Limits -->
+        <h3 style="margin-top: 2rem; margin-bottom: 1rem; font-size: 1.2rem;">
+          <i data-lucide="book-open"></i> Guia Completo de Regimes Tributários e Alíquotas
+        </h3>
+
+        <div class="info-box">
+          <div class="info-box-title"><i data-lucide="layers"></i> Resumo dos Limites de Faturamento e Alíquotas:</div>
+          <div class="regime-table-container">
+            <table class="custom-table">
+              <thead>
+                <tr>
+                  <th>Regime / Porte</th>
+                  <th>Limite de Faturamento</th>
+                  <th>Percentuais de Imposto</th>
+                  <th>Exemplo Prático</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>MEI</strong></td>
+                  <td>Até R$ 81.000,00 / ano (R$ 6.750,00 / mês)</td>
+                  <td>Valor fixo mensal DAS (~R$ 71,00 a R$ 76,00/mês)</td>
+                  <td>Serviço faturando R$ 5.000/mês paga apenas R$ 75,00/mês fixo.</td>
+                </tr>
+                <tr>
+                  <td><strong>Simples Nacional - Anexo I</strong> (Comércio)</td>
+                  <td>Até R$ 4.800.000,00 / ano</td>
+                  <td>4.00% a 11.12% (conforme faixa de faturamento)</td>
+                  <td>Loja física faturando R$ 15.000/mês paga ~R$ 600,00 em impostos.</td>
+                </tr>
+                <tr>
+                  <td><strong>Simples Nacional - Anexo II</strong> (Indústria)</td>
+                  <td>Até R$ 4.800.000,00 / ano</td>
+                  <td>4.50% a 14.70% (conforme faixa de faturamento)</td>
+                  <td>Marcenaria faturando R$ 30.000/mês paga ~R$ 1.350,00.</td>
+                </tr>
+                <tr>
+                  <td><strong>Simples Nacional - Anexo III</strong> (Serviços)</td>
+                  <td>Até R$ 4.800.000,00 / ano</td>
+                  <td>6.00% a 19.50% (Serviços gerais, TI, Consultoria com Fator R)</td>
+                  <td>Agência de marketing faturando R$ 20.000/mês paga R$ 1.200,00.</td>
+                </tr>
+                <tr>
+                  <td><strong>Simples Nacional - Anexo IV</strong> (Obras/Advocacia)</td>
+                  <td>Até R$ 4.800.000,00 / ano</td>
+                  <td>4.50% a 16.85% (+ CPP patronal recolhido à parte)</td>
+                  <td>Escritório de advocacia faturando R$ 25.000/mês paga ~R$ 1.125,00.</td>
+                </tr>
+                <tr>
+                  <td><strong>Simples Nacional - Anexo V</strong> (Intelectual sem Fator R)</td>
+                  <td>Até R$ 4.800.000,00 / ano</td>
+                  <td>15.50% a 19.25% (Sem atingir 28% de folha salarial)</td>
+                  <td>Programador sem folha faturando R$ 10.000/mês paga R$ 1.550,00.</td>
+                </tr>
+                <tr>
+                  <td><strong>Lucro Presumido</strong></td>
+                  <td>Até R$ 78.000.000,00 / ano</td>
+                  <td>~13.33% a 16.33% (Serviços) | ~5.93% + ICMS (Comércio)</td>
+                  <td>Clínica médica faturando R$ 60.000/mês paga ~R$ 9.198,00 em impostos.</td>
+                </tr>
+                <tr>
+                  <td><strong>Lucro Real</strong></td>
+                  <td>Obrigatório acima de R$ 78M / ano ou margem baixa</td>
+                  <td>15% IRPJ + 9% CSLL sobre o Lucro Líquido Real + PIS/COFINS</td>
+                  <td>Distribuidora de combustível com alta receita e margem de 2%.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="panel-footer-actions">
+          <button type="button" class="btn btn-secondary btn-prev-step">
+            <i data-lucide="arrow-left"></i> Voltar
+          </button>
+          <button type="button" class="btn btn-primary btn-next-step">
+            Avançar: Empresa & Local <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 4: DADOS DA EMPRESA E ENDEREÇO / IPTU -->
+      <section class="step-content-panel" id="panelStep4">
+        <div class="panel-header">
+          <h2><i data-lucide="map-pin"></i> 4. Nome da Empresa, Endereço e Zoneamento (IPTU)</h2>
+          <p>Informações de localização e nome comercial da futura empresa.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="razaoSocialSugerida">Razão Social Pretendida / Nome da Empresa <span class="required">*</span></label>
+          <input type="text" id="razaoSocialSugerida" class="input-text" placeholder="Ex: Silva & Santos Serviços de Tecnologia LTDA" required>
+          <div class="form-hint">Nome oficial que constará no Contrato Social e Cartão CNPJ.</div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="nomeFantasia">Nome Fantasia (Se houver)</label>
+          <input type="text" id="nomeFantasia" class="input-text" placeholder="Ex: TechInnovate Soluções">
+          <div class="form-hint">Nome comercial utilizado em faixas, site e material publicitário.</div>
+        </div>
+
+        <div class="info-box amber">
+          <div class="info-box-title"><i data-lucide="alert-triangle"></i> Atenção quanto ao Registro de Marca (INPI):</div>
+          <p>O nome empresarial registrado na Junta Comercial assegura uso no estado. Caso deseje proteção nacional da marca comercial, recomenda-se o registro posterior junto ao <strong>INPI (Instituto Nacional da Propriedade Industrial)</strong>.</p>
+        </div>
+
+        <!-- Forma de Atuação -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="formaAtuacao">Forma de Atuação da Empresa: <span class="required">*</span></label>
+            <select id="formaAtuacao" class="select-input" required>
+              <option value="Estabelecimento Fixo">Estabelecimento Fixo (Escritório, Loja, Galpão)</option>
+              <option value="Internet / Digital">Exclusivamente pela Internet / Home Office</option>
+              <option value="Porta a Porta / Fora do Estabelecimento">Porta a Porta / Prestação de Serviço no Cliente</option>
+              <option value="Ambulante">Ambulante / Atividade Móvel</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="tipoImovelSede">Tipo do Imóvel Sede: <span class="required">*</span></label>
+            <select id="tipoImovelSede" class="select-input" required>
+              <option value="Imóvel Próprio">Imóvel Próprio</option>
+              <option value="Alugado / Locado (Requer Contrato de Locação)" selected>Alugado / Locado (Requer Contrato de Locação)</option>
+              <option value="Imóvel Cedido / Comodato">Imóvel Cedido / Comodato</option>
+              <option value="Sede Virtual / Coworking / Fiscal">Sede Virtual / Coworking / Endereço Fiscal</option>
+              <option value="Residencial do Sócio">Residencial do Sócio (Home Office)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="metragemImovel">Metragem da Sede (m²):</label>
+            <input type="text" id="metragemImovel" class="input-text" placeholder="Ex: 45 m²">
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
+          <div class="form-group">
+            <label class="form-label" for="atendimentoPublico">Haverá Atendimento de Público no local? <span class="required">*</span></label>
+            <select id="atendimentoPublico" class="select-input" required>
+              <option value="Não (Apenas administrativo / interno)">Não (Apenas administrativo / interno)</option>
+              <option value="Sim (Recepção de clientes / loja aberta)">Sim (Recepção de clientes / loja aberta)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="estocagemProdutos">Haverá Estocagem de Mercadorias / Inflamáveis? <span class="required">*</span></label>
+            <select id="estocagemProdutos" class="select-input" required>
+              <option value="Não">Não</option>
+              <option value="Sim (Apenas estocagem de produtos comuns)">Sim (Apenas estocagem de produtos comuns)</option>
+              <option value="Sim (Produtos inflamáveis / químicos - Exige Vistoria Bombeiros)">Sim (Produtos inflamáveis / químicos - Exige Vistoria Bombeiros)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Endereço & IPTU -->
+        <h3 style="font-size: 1.1rem; margin-top: 1.5rem; margin-bottom: 0.85rem;">
+          <i data-lucide="home"></i> Consulta de Viabilidade & Inscrição Imobiliária (IPTU)
+        </h3>
+
+        <div class="info-box">
+          <div class="info-box-title"><i data-lucide="file-text"></i> Zoneamento Municipal & Matrícula IPTU:</div>
+          <p>Para autorização de funcionamento (Alvará), a prefeitura verifica a lei de zoneamento do município através do número de inscrição do IPTU do imóvel.</p>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="inscricaoIPTU">Número do Cadastro / Inscrição do IPTU do Imóvel: <span class="required">*</span></label>
+          <input type="text" id="inscricaoIPTU" class="input-text" placeholder="Ex: 01.02.034.0567.001" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="enderecoCompleto">Endereço Completo de Funcionamento: <span class="required">*</span></label>
+          <textarea id="enderecoCompleto" class="textarea-input" placeholder="Rua, Número, Complemento, Bairro, CEP, Cidade/UF" required></textarea>
+        </div>
+
+        <div class="panel-footer-actions">
+          <button type="button" class="btn btn-secondary btn-prev-step">
+            <i data-lucide="arrow-left"></i> Voltar
+          </button>
+          <button type="button" class="btn btn-primary btn-next-step">
+            Avançar: Quadro Societário <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 5: QUADRO SOCIETÁRIO E IMPEDIMENTOS LEGAIS -->
+      <section class="step-content-panel" id="panelStep5">
+        <div class="panel-header">
+          <h2><i data-lucide="users"></i> 5. Quadro Societário e Verificação de Impedimentos Legais</h2>
+          <p>Cadastre os sócios da empresa, a distribuição do capital social e verifique proibições por lei.</p>
+        </div>
+
+        <!-- Legal Impediments Guide -->
+        <div class="info-box rose">
+          <div class="info-box-title"><i data-lucide="shield-alert"></i> Principais Impedimentos Legais por Lei:</div>
+          <ul>
+            <li><strong>Impedimento de Função:</strong> Médico para exercício simultâneo de farmácia e vice-versa.</li>
+            <li><strong>Regime de Bens entre Cônjuges:</strong> Cônjuges casados em Comunhão Universal ou Separação Obrigatória de Bens não podem ser sócios entre si na mesma empresa.</li>
+            <li><strong>Funcionários Públicos:</strong> Servidores públicos federais ativos não podem ser administradores/gerentes de empresa (podem ser apenas sócios cotistas em alguns casos, conforme estatuto).</li>
+            <li><strong>Incapazes ou Condenados:</strong> Impedimentos em virtude de condenação criminal específica ou incapacidade civil absoluta.</li>
+          </ul>
+        </div>
+
+        <!-- Dynamic Partners Container -->
+        <div id="partnersContainer">
+          <!-- Partners will be generated dynamically by JS -->
+        </div>
+
+        <button type="button" class="btn btn-secondary" id="btnAddPartner" style="margin-bottom: 1.5rem;">
+          <i data-lucide="user-plus"></i> Adicionar Outro Sócio
+        </button>
+
+        <div class="panel-footer-actions">
+          <button type="button" class="btn btn-secondary btn-prev-step">
+            <i data-lucide="arrow-left"></i> Voltar
+          </button>
+          <button type="button" class="btn btn-primary btn-next-step">
+            Avançar: Anexo de Documentos <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 6: CHECKLIST DE DOCUMENTAÇÃO E ANEXOS PDF -->
+      <section class="step-content-panel" id="panelStep6">
+        <div class="panel-header">
+          <h2><i data-lucide="file-check"></i> 6. Checklist de Documentação e Anexo de Arquivos PDF</h2>
+          <p>Todo o processo de abertura é feito em formato 100% digital. Anexe os documentos solicitados em formato PDF.</p>
+        </div>
+
+        <div class="info-box emerald">
+          <div class="info-box-title"><i data-lucide="check-circle-2"></i> Requisitos dos Documentos:</div>
+          <p>Os arquivos devem estar digitalizados, legíveis e obrigatoriamente no formato <strong>PDF</strong>.</p>
+        </div>
+
+        <!-- Checklist Item 1: IPTU -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="home"></i></div>
+            <div class="doc-details">
+              <h4>Cópia do IPTU (Matrícula e Endereço) <span class="required">*</span></h4>
+              <p>Cópia da folha do IPTU onde conste a inscrição imobiliária, metragem e endereço do imóvel sede.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="iptu">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF do IPTU aqui</p>
+            <input type="file" id="fileIptu" accept="application/pdf">
+            <div class="file-preview-list" id="previewIptu"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 2: RG/CPF/CNH dos Sócios -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="id-card"></i></div>
+            <div class="doc-details">
+              <h4>Dados Pessoais dos Sócios (RG, CNH, CPF) <span class="required">*</span></h4>
+              <p>Documento de identificação oficial com foto legível de todos os sócios.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="documentos_socios">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF do RG/CNH dos sócios</p>
+            <input type="file" id="fileSocios" accept="application/pdf" multiple>
+            <div class="file-preview-list" id="previewSocios"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 3: Comprovante de Residência -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="map-pinned"></i></div>
+            <div class="doc-details">
+              <h4>Comprovante de Residência dos Sócios <span class="required">*</span></h4>
+              <p>Conta de água, luz ou telefone recente (últimos 90 dias) em nome de cada sócio.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="comprovante_residencia">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF do Comprovante de Residência</p>
+            <input type="file" id="fileResidencia" accept="application/pdf" multiple>
+            <div class="file-preview-list" id="previewResidencia"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 4: Certidão de Casamento -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="heart"></i></div>
+            <div class="doc-details">
+              <h4>Certidão de Casamento ou União Estável (Se Casado)</h4>
+              <p>Cópia da certidão de casamento para comprovação do regime de bens dos sócios casados.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="certidao_casamento">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF da Certidão de Casamento</p>
+            <input type="file" id="fileCasamento" accept="application/pdf" multiple>
+            <div class="file-preview-list" id="previewCasamento"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 5: Contrato de Locação -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="building"></i></div>
+            <div class="doc-details">
+              <h4>Contrato de Locação ou Autorização do Imóvel Sede</h4>
+              <p>Contrato de aluguel assinado ou declaração de cessão/comodato (se o imóvel for alugado ou terceirizado).</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="contrato_locacao">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF do Contrato de Locação</p>
+            <input type="file" id="fileLocacao" accept="application/pdf">
+            <div class="file-preview-list" id="previewLocacao"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 6: Registro Conselho de Classe -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="award"></i></div>
+            <div class="doc-details">
+              <h4>Registro em Conselho de Classe (Profissão Regulamentada)</h4>
+              <p>Carteira do CRM, OAB, CREA, CRC, CRO, CRA, etc., caso a atividade exija registro profissional.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="conselho_classe">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF da Carteira do Conselho</p>
+            <input type="file" id="fileConselho" accept="application/pdf" multiple>
+            <div class="file-preview-list" id="previewConselho"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 7: Recibo IRPF / Título Eleitor -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="file-text"></i></div>
+            <div class="doc-details">
+              <h4>Recibo do IRPF ou Título de Eleitor dos Sócios</h4>
+              <p>Recibo da última declaração do Imposto de Renda Pessoa Física ou Título de Eleitor para transmissão do DBE.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="irpf_eleitor">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste o PDF do Recibo IRPF ou Título</p>
+            <input type="file" id="fileIrpf" accept="application/pdf" multiple>
+            <div class="file-preview-list" id="previewIrpf"></div>
+          </div>
+        </div>
+
+        <!-- Checklist Item 8: Minuta / Outros -->
+        <div class="doc-checklist-item">
+          <div class="doc-info">
+            <div class="doc-icon"><i data-lucide="file-plus"></i></div>
+            <div class="doc-details">
+              <h4>Outros Documentos / Minutas Adicionais (Opcional)</h4>
+              <p>Quaisquer outros documentos complementares ou rascunhos de contratos.</p>
+            </div>
+          </div>
+          <div class="file-dropzone" data-doc-type="outros">
+            <i data-lucide="upload-cloud" style="font-size: 2rem; color: var(--primary-600);"></i>
+            <p style="font-weight: 600; margin-top: 0.4rem;">Clique ou arraste arquivos adicionais em PDF</p>
+            <input type="file" id="fileOutros" accept="application/pdf" multiple>
+            <div class="file-preview-list" id="previewOutros"></div>
+          </div>
+        </div>
+
+        <div class="panel-footer-actions">
+          <button type="button" class="btn btn-secondary btn-prev-step">
+            <i data-lucide="arrow-left"></i> Voltar
+          </button>
+          <button type="button" class="btn btn-primary btn-next-step" id="btnGoToSummary">
+            Gerar Resumo & Concluir <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- STEP 7: RESUMO, DOSSIÊ E INTEGRACAO GOOGLE DRIVE -->
+      <section class="step-content-panel" id="panelStep7">
+        <div class="panel-header">
+          <h2><i data-lucide="check-circle-2"></i> 7. Resumo do Dossiê de Abertura & Salvamento no Google Drive</h2>
+          <p>Revise todos os dados informados e escolha como deseja salvar ou transmitir o dossiê da sua empresa.</p>
+        </div>
+
+        <!-- Final Summary View -->
+        <div class="summary-container" id="summaryView">
+          <!-- Populated dynamically by JS -->
+        </div>
+
+        <!-- Action Cards: Export & Google Drive -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.25rem; margin-bottom: 2rem;">
+          
+          <!-- Google Drive Auto-Save Box -->
+          <div style="background: var(--primary-50); border: 2px solid var(--accent-emerald); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="background: var(--accent-emerald); color: #fff; padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; display: inline-block; margin-bottom: 0.5rem;">OPÇÃO 1: SALVAMENTO AUTOMÁTICO NA NUVEM</div>
+              <h3 style="color: var(--primary-700); font-size: 1.15rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <i data-lucide="cloud-upload"></i> Salvar na Pasta do Google Drive
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Envia este Dossiê com todas as respostas e resumos diretamente para a pasta da sua contabilidade no Google Drive.
+              </p>
+
+              <!-- URL Input Field & Connection Status -->
+              <div style="margin-bottom: 1rem;">
+                <label class="form-label" style="font-size: 0.8rem;" for="inputDriveUrl">URL do Webhook do Google Apps Script:</label>
+                <div style="display: flex; gap: 0.5rem;">
+                  <input type="text" id="inputDriveUrl" class="input-text" style="font-size: 0.8rem; padding: 0.5rem;" placeholder="https://script.google.com/macros/s/.../exec">
+                  <button type="button" class="btn btn-secondary" id="btnTestDriveConnection" style="padding: 0.5rem 0.85rem; font-size: 0.8rem; white-space: nowrap;" title="Testar se o Webhook responde corretamente">
+                    <i data-lucide="plug"></i> Testar
+                  </button>
+                </div>
+                <div id="driveStatusText" style="font-size: 0.78rem; margin-top: 0.35rem; font-weight: 600;"></div>
+              </div>
+            </div>
+
+            <button type="button" class="btn btn-emerald" id="btnUploadDrive" style="width: 100%; justify-content: center; font-size: 1.05rem; padding: 1rem;">
+              <i data-lucide="cloud-lightning"></i> ENVIAR DOSSIÊ PARA O GOOGLE DRIVE
+            </button>
+          </div>
+
+          <!-- Download PDF Dossiê Box -->
+          <div style="background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="background: var(--bg-card-subtle); color: var(--text-secondary); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; display: inline-block; margin-bottom: 0.5rem;">OPÇÃO 2: IMPRESSÃO OU CÓPIA LOCAL</div>
+              <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <i data-lucide="file-down"></i> Imprimir / Salvar PDF no Computador
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Gere um arquivo PDF no seu próprio computador para guardar uma cópia física ou impressa.
+              </p>
+            </div>
+            <button type="button" class="btn btn-primary" id="btnDownloadPDF" style="width: 100%; justify-content: center;">
+              <i data-lucide="printer"></i> Imprimir / Gerar PDF Local
+            </button>
+          </div>
+
+          <!-- Download JSON Package Box -->
+          <div style="background: var(--bg-card); border: 1.5px solid var(--border-color); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;">
+            <div>
+              <div style="background: var(--bg-card-subtle); color: var(--text-secondary); padding: 0.2rem 0.6rem; border-radius: 999px; font-size: 0.75rem; font-weight: 700; display: inline-block; margin-bottom: 0.5rem;">OPÇÃO 3: ARQUIVO DE DADOS</div>
+              <h3 style="font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.5rem;">
+                <i data-lucide="download"></i> Baixar Arquivo de Dados (.JSON)
+              </h3>
+              <p style="font-size: 0.88rem; color: var(--text-secondary); margin-bottom: 1rem;">
+                Baixe os dados puros para importação direta em sistemas de gestão contábil.
+              </p>
+            </div>
+            <button type="button" class="btn btn-secondary" id="btnExportJSON" style="width: 100%; justify-content: center;">
+              <i data-lucide="code"></i> Baixar Arquivo JSON
+            </button>
+          </div>
+
+        </div>
+
+        <div class="panel-footer-actions">
+          <button type="button" class="btn btn-secondary btn-prev-step">
+            <i data-lucide="arrow-left"></i> Voltar e Editar
+          </button>
+          <button type="button" class="btn btn-emerald" onclick="window.location.reload();">
+            <i data-lucide="refresh-cw"></i> Iniciar Novo Plano
+          </button>
+        </div>
+      </section>
+
+    </form>
+  </main>
+
+  <!-- Toast Notification -->
+  <div class="toast-msg" id="toastMsg">
+    <i data-lucide="check-circle"></i>
+    <span id="toastText">Rascunho salvo com sucesso!</span>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
