@@ -37,24 +37,25 @@ function salvarNoDrive(data) {
   try {
     // -------------------------------------------------------------------------
     // 1. COLE AQUI O LINK DA SUA PASTA DO GOOGLE DRIVE (OU APENAS O ID):
+    // (Se deixar como está ou em branco, o script criará a pasta "Abertura de Empresas - Clientes" no seu Drive automaticamente)
     // -------------------------------------------------------------------------
     var PASTA_INPUT = "COLE_O_LINK_OU_ID_DA_SUA_PASTA_AQUI"; 
     
     var folderId = extrairFolderId(PASTA_INPUT);
-    var folder;
+    var parentFolder;
     
-    try {
-      if (folderId && folderId !== "COLE_O_LINK_OU_ID_DA_SUA_PASTA_AQUI") {
-        folder = DriveApp.getFolderById(folderId);
-      } else {
-        folder = DriveApp.getRootFolder();
+    if (folderId) {
+      try {
+        parentFolder = DriveApp.getFolderById(folderId);
+      } catch (fErr) {
+        parentFolder = obterOuCriarPastaPadrao();
       }
-    } catch (fErr) {
-      folder = DriveApp.getRootFolder();
+    } else {
+      parentFolder = obterOuCriarPastaPadrao();
     }
 
     // -------------------------------------------------------------------------
-    // 2. Criar Subpasta Exclusiva para o Cliente (Organização Automática)
+    // 2. Criar Subpasta Exclusiva para este Cliente (Organização Automática)
     // -------------------------------------------------------------------------
     var nomeCliente = (data.socios && data.socios[0] && data.socios[0].nome) || "Cliente";
     var nomeEmpresa = (data.dadosNomes && data.dadosNomes.razaoOpcao1) || data.razaoSocial || "Empresa_Nova";
@@ -63,7 +64,7 @@ function salvarNoDrive(data) {
     // Nome da subpasta ex: [2026-07-28] Moda Paulista LTDA - João da Silva
     var subfolderName = "[" + dataHoje + "] " + nomeEmpresa.replace(/[\/\\:*?"<>|]/g, "_").trim() + " - " + nomeCliente.replace(/[\/\\:*?"<>|]/g, "_").trim();
     
-    var clientFolder = folder.createFolder(subfolderName);
+    var clientFolder = parentFolder.createFolder(subfolderName);
     var fileName = "Ficha_Abertura_" + nomeEmpresa.replace(/[^a-zA-Z0-9]/g, "_");
 
     // -------------------------------------------------------------------------
@@ -270,11 +271,26 @@ function salvarNoDrive(data) {
   }
 }
 
+// Busca a pasta "Abertura de Empresas - Clientes" ou cria uma automaticamente se não existir
+function obterOuCriarPastaPadrao() {
+  var pastas = DriveApp.getFoldersByName("Abertura de Empresas - Clientes");
+  if (pastas.hasNext()) {
+    return pastas.next();
+  } else {
+    return DriveApp.createFolder("Abertura de Empresas - Clientes");
+  }
+}
+
+// Extrai o ID da pasta do Google Drive
 function extrairFolderId(input) {
-  if (!input) return "";
-  var match = input.match(/folders\/([a-zA-Z0-9_-]+)/);
-  if (match && match[1]) return match[1];
-  return input.trim();
+  if (!input || input === "COLE_O_LINK_OU_ID_DA_SUA_PASTA_AQUI") return "";
+  var str = input.trim();
+  var matchFolders = str.match(/folders\/([a-zA-Z0-9_-]+)/);
+  if (matchFolders && matchFolders[1]) return matchFolders[1];
+  var matchId = str.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+  if (matchId && matchId[1]) return matchId[1];
+  if (/^[a-zA-Z0-9_-]+$/.test(str)) return str;
+  return "";
 }
 ```
 
@@ -293,8 +309,14 @@ function extrairFolderId(input) {
 
 ---
 
-## Passo 4: Colar a URL no Formulário do Site
+## Passo 4: Configurar a URL do Webhook no Projeto (`app.js`)
 
-1. Cole essa URL gerada no campo **"URL do Webhook do Google Apps Script"** no Passo 4 do formulário do seu site.
-2. Clique em **"Testar"**. O formulário salvará essa URL no navegador e, a partir de agora, **toda solicitação e documentos anexados pelos seus clientes irão diretamente para a sua pasta do Google Drive**!
+1. Abra o arquivo [app.js](file:///c:/projetos%20GitHub/plano_abertura_empresa/plano_abertura_empresa/app.js) no seu editor de código.
+2. Na **linha 5**, cole a URL do Webhook copiada (que termina em `/exec`) dentro das aspas da constante `DEFAULT_WEBHOOK_URL`:
+   ```javascript
+   const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/SUA_URL_DO_WEBHOOK/exec';
+   ```
+3. Salve o arquivo `app.js` e faça o `git commit` / `push` para atualizar o seu site online.
+
+Pronto! Agora o seu site online enviará todas as solicitações e documentos anexados diretamente para a pasta do seu Google Drive de forma 100% automática e transparente para o cliente!
 

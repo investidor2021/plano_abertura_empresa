@@ -640,22 +640,67 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result;
-        const base64Data = dataUrl.split(',')[1] || dataUrl;
-        resolve({
-          fileName: file.name,
-          nomeArquivo: file.name,
-          fileType: file.type || 'application/octet-stream',
-          mimeType: file.type || 'application/octet-stream',
-          tamanhoBytes: file.size,
-          base64: base64Data
-        });
-      };
-      reader.onerror = err => reject(err);
-      reader.readAsDataURL(file);
+      if (file.type && file.type.startsWith('image/')) {
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          img.src = e.target.result;
+        };
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+          const maxDim = 1280;
+          if (width > maxDim || height > maxDim) {
+            if (width > height) {
+              height = Math.round((height * maxDim) / width);
+              width = maxDim;
+            } else {
+              width = Math.round((width * maxDim) / height);
+              height = maxDim;
+            }
+          }
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+          const compressedDataUrl = canvas.toDataURL('image/jpeg', 0.8);
+          const base64Data = compressedDataUrl.split(',')[1];
+          resolve({
+            fileName: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+            nomeArquivo: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+            fileType: 'image/jpeg',
+            mimeType: 'image/jpeg',
+            tamanhoBytes: Math.round((base64Data.length * 3) / 4),
+            base64: base64Data
+          });
+        };
+        img.onerror = () => {
+          readRawFile(file, resolve, reject);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        readRawFile(file, resolve, reject);
+      }
     });
+  }
+
+  function readRawFile(file, resolve, reject) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result;
+      const base64Data = dataUrl.split(',')[1] || dataUrl;
+      resolve({
+        fileName: file.name,
+        nomeArquivo: file.name,
+        fileType: file.type || 'application/octet-stream',
+        mimeType: file.type || 'application/octet-stream',
+        tamanhoBytes: file.size,
+        base64: base64Data
+      });
+    };
+    reader.onerror = err => reject(err);
+    reader.readAsDataURL(file);
   }
 
   function setupInterviewFileInputListeners() {
@@ -697,43 +742,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupInterviewFileInputListeners();
 
-  document.getElementById('btnIntTestDriveConnection')?.addEventListener('click', async () => {
-    const inputUrl = document.getElementById('intInputDriveUrl');
-    const statusText = document.getElementById('intDriveStatusText');
-    const url = inputUrl.value.trim();
-
-    if (!url) {
-      statusText.style.color = 'var(--rose-500)';
-      statusText.textContent = '❌ Por favor, informe a URL do Webhook do Apps Script.';
-      return;
-    }
-
-    statusText.style.color = 'var(--primary-600)';
-    statusText.textContent = '🔄 Testando conexão com o Google Drive...';
-
-    try {
-      await fetch(url);
-      state.googleDriveWebhookUrl = url;
-      localStorage.setItem('drive_webhook_url', url);
-      statusText.style.color = 'var(--accent-emerald-dark)';
-      statusText.textContent = '✅ Conexão estabelecida e confirmada!';
-      showToast('Conexão com o Google Drive ativada!', 'emerald');
-    } catch (e) {
-      statusText.style.color = 'var(--amber-500)';
-      statusText.textContent = '⚠️ Webhook configurado. Caso não salve, verifique permissões no Apps Script.';
-    }
-  });
-
   document.getElementById('btnIntDownloadPDF')?.addEventListener('click', () => {
     window.print();
   });
 
   document.getElementById('btnIntUploadDrive')?.addEventListener('click', async () => {
+    const btn = document.getElementById('btnIntUploadDrive');
+    const statusText = document.getElementById('intDriveStatusText');
     const inputUrl = document.getElementById('intInputDriveUrl');
     let webhookUrl = (inputUrl && inputUrl.value.trim()) || state.googleDriveWebhookUrl || DEFAULT_WEBHOOK_URL;
 
     if (!webhookUrl || webhookUrl.indexOf('http') === -1) {
-      webhookUrl = prompt('Por favor, informe a URL do Webhook do Google Apps Script (termina em /exec):');
+      webhookUrl = prompt('Configuração da Contabilidade: Por favor, informe a URL do Webhook do Google Apps Script (termina em /exec):');
       if (!webhookUrl) return;
       webhookUrl = webhookUrl.trim();
       if (inputUrl) inputUrl.value = webhookUrl;
@@ -741,7 +761,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     state.googleDriveWebhookUrl = webhookUrl;
     localStorage.setItem('drive_webhook_url', webhookUrl);
-    showToast('Enviando Ficha e Anexos para o Google Drive...', 'primary');
+
+    // Feedback visual de envio
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Transmitindo Solicitação e Documentos...';
+      lucide.createIcons();
+    }
+    if (statusText) {
+      statusText.style.color = 'var(--primary-600)';
+      statusText.textContent = '⏳ Transmitindo seus dados e arquivos anexados... Por favor, aguarde.';
+    }
+
+    showToast('Transmitindo solicitação para a contabilidade...', 'primary');
 
     try {
       const payload = getInterviewPayloadObject();
@@ -751,11 +783,33 @@ document.addEventListener('DOMContentLoaded', () => {
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
         body: JSON.stringify(payload)
       });
-      showToast('Ficha e Anexos enviados para o Google Drive com sucesso!', 'emerald');
-      alert('✅ Dados e Anexos Enviados com Sucesso!\n\nOs dados do formulário e todos os documentos anexados (CNH, Comprovante de Endereço, etc.) foram salvos na sua pasta do Google Drive.');
+
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="check-circle-2"></i> SOLICITAÇÃO ENVIADA COM SUCESSO!';
+        btn.style.background = 'var(--accent-emerald-dark)';
+        lucide.createIcons();
+      }
+
+      if (statusText) {
+        statusText.style.color = 'var(--accent-emerald-dark)';
+        statusText.textContent = '✅ Solicitação e documentos recebidos com sucesso pela nossa equipe contábil!';
+      }
+
+      showToast('Solicitação e anexos transmitidos com sucesso!', 'emerald');
+      alert('✅ Solicitação e Documentos Enviados com Sucesso!\n\nRecebemos os seus dados e todos os documentos anexados. Nossa equipe de contabilidade iniciará o estudo fiscal e entrará em contato em breve.');
     } catch (err) {
       console.error(err);
-      showToast('Erro ao conectar com o Google Drive.', 'rose');
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i data-lucide="send"></i> ENVIAR SOLICITAÇÃO & DOCUMENTOS';
+        lucide.createIcons();
+      }
+      if (statusText) {
+        statusText.style.color = 'var(--rose-500)';
+        statusText.textContent = '⚠️ Houve uma instabilidade na transmissão. Por favor, tente novamente.';
+      }
+      showToast('Erro ao transmitir solicitação.', 'rose');
     }
   });
 
