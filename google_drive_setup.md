@@ -53,11 +53,21 @@ function salvarNoDrive(data) {
       folder = DriveApp.getRootFolder();
     }
 
-    var empresaNome = (data.dadosNomes && data.dadosNomes.razaoOpcao1) || data.razaoSocial || "Empresa_Nova";
-    var fileName = "Ficha_Abertura_" + empresaNome.replace(/[^a-zA-Z0-9]/g, "_");
+    // -------------------------------------------------------------------------
+    // 2. Criar Subpasta Exclusiva para o Cliente (Organização Automática)
+    // -------------------------------------------------------------------------
+    var nomeCliente = (data.socios && data.socios[0] && data.socios[0].nome) || "Cliente";
+    var nomeEmpresa = (data.dadosNomes && data.dadosNomes.razaoOpcao1) || data.razaoSocial || "Empresa_Nova";
+    var dataHoje = Utilities.formatDate(new Date(), "GMT-3", "yyyy-MM-dd");
+    
+    // Nome da subpasta ex: [2026-07-28] Moda Paulista LTDA - João da Silva
+    var subfolderName = "[" + dataHoje + "] " + nomeEmpresa.replace(/[\/\\:*?"<>|]/g, "_").trim() + " - " + nomeCliente.replace(/[\/\\:*?"<>|]/g, "_").trim();
+    
+    var clientFolder = folder.createFolder(subfolderName);
+    var fileName = "Ficha_Abertura_" + nomeEmpresa.replace(/[^a-zA-Z0-9]/g, "_");
 
     // -------------------------------------------------------------------------
-    // 2. Monta o Dossiê em PDF Completo e Detalhado para a Contabilidade
+    // 3. Monta o Dossiê em PDF Completo e Detalhado para a Contabilidade
     // -------------------------------------------------------------------------
     var dataFormatada = new Date().toLocaleDateString('pt-BR');
     var protocolo = "AB-" + new Date().getTime().toString().substr(-6);
@@ -219,13 +229,13 @@ function salvarNoDrive(data) {
     `;
 
     // -------------------------------------------------------------------------
-    // 3. Salva o PDF do Formulário no Google Drive
+    // 4. Salva o PDF do Formulário Dentro da Subpasta do Cliente
     // -------------------------------------------------------------------------
     var blob = Utilities.newBlob(html, "text/html", fileName + ".html");
-    var pdfFile = folder.createFile(blob.getAs("application/pdf")).setName(fileName + ".pdf");
+    var pdfFile = clientFolder.createFile(blob.getAs("application/pdf")).setName(fileName + ".pdf");
 
     // -------------------------------------------------------------------------
-    // 4. Salva TODOS os arquivos anexados (CNH, Comprovante, IPTU) na mesma pasta!
+    // 5. Salva TODOS os arquivos anexados dentro da Subpasta do Cliente!
     // -------------------------------------------------------------------------
     var listaAnexos = data.anexos || data.documentosAnexadosFiles || [];
     var anexosCriados = [];
@@ -237,7 +247,7 @@ function salvarNoDrive(data) {
           var nomeComCat = (doc.categoria ? ("[" + doc.categoria.replace(/[^a-zA-Z0-9]/g, "_") + "]_") : "") + (doc.nomeArquivo || doc.fileName || ("Anexo_" + (i+1)));
           var mime = doc.mimeType || doc.fileType || "application/pdf";
           var fileBlob = Utilities.newBlob(Utilities.base64Decode(doc.base64), mime, nomeComCat);
-          var createdFile = folder.createFile(fileBlob);
+          var createdFile = clientFolder.createFile(fileBlob);
           anexosCriados.push(createdFile.getName());
         } catch (docErr) {
           Logger.log("Erro ao salvar anexo: " + docErr.toString());
@@ -247,10 +257,10 @@ function salvarNoDrive(data) {
 
     return ContentService.createTextOutput(JSON.stringify({ 
       status: "success", 
-      message: "Ficha PDF e todos os documentos anexados foram salvos no Google Drive com sucesso!",
+      message: "Subpasta criada e documentos salvos com sucesso no Google Drive!",
+      folderName: clientFolder.getName(),
       fileName: pdfFile.getName(),
-      anexosContagem: anexosCriados.length,
-      folderName: folder.getName()
+      anexosContagem: anexosCriados.length
     })).setMimeType(ContentService.MimeType.JSON);
 
   } catch (error) {
