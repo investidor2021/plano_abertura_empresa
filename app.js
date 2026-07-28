@@ -2,6 +2,10 @@
    PLANO DE ABERTURA EMPRESA - APPLICATION LOGIC (JS)
    ========================================================================== */
 
+// Configuração da URL do Webhook do Google Apps Script
+// (Cole a sua URL aqui para que o formulário online envie automaticamente sem o cliente precisar digitar)
+const DEFAULT_WEBHOOK_URL = 'https://script.google.com/macros/s/AKfycbx3Fmw8oNcEuH9AQ86CSrvS2A7-AvZQdkz3Q5CyJju7ghKJT7WZHJzFnq5whU2T9uY/exec';
+
 document.addEventListener('DOMContentLoaded', () => {
   
   // Application State - Technical Guide (Existing)
@@ -44,7 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
       irpf_eleitor: [],
       outros: []
     },
-    googleDriveWebhookUrl: localStorage.getItem('drive_webhook_url') || ''
+    googleDriveWebhookUrl: localStorage.getItem('drive_webhook_url') || DEFAULT_WEBHOOK_URL
   };
 
   // State - Client Interview (Simplified Intake Screen)
@@ -726,10 +730,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnIntUploadDrive')?.addEventListener('click', async () => {
     const inputUrl = document.getElementById('intInputDriveUrl');
-    let webhookUrl = inputUrl ? inputUrl.value.trim() : state.googleDriveWebhookUrl;
+    let webhookUrl = (inputUrl && inputUrl.value.trim()) || state.googleDriveWebhookUrl || DEFAULT_WEBHOOK_URL;
 
-    if (!webhookUrl) {
-      webhookUrl = prompt('Por favor, cole a URL do Webhook do Google Apps Script (termina em /exec):');
+    if (!webhookUrl || webhookUrl.indexOf('http') === -1) {
+      webhookUrl = prompt('Por favor, informe a URL do Webhook do Google Apps Script (termina em /exec):');
       if (!webhookUrl) return;
       webhookUrl = webhookUrl.trim();
       if (inputUrl) inputUrl.value = webhookUrl;
